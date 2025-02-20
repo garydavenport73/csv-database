@@ -382,24 +382,23 @@ canvas {
                                 <label for="y-axis">Y Axis:</label>
                                 <select id="y-axis"></select>
                                 <label for="y-axis">Label (Optional)</label>
-                                <select id="label-select"></select>
-                                
+                                <select id="label-select"></select>    
                             </div>
-
                             <div class="flex-column">
                                 <label for="x-axis-min">X Min:</label>
                                 <input id="x-axis-min" placeholder="Enter Auto or a number..." value="Auto">
                                 <label for="x-axis-max">X Max:</label>
                                 <input id="x-axis-max" placeholder="Enter Auto or a number..." value="Auto">
+                                <label for="clicked-coordinates">Clicked Coordinates:</label>
+                                <input id="clicked-coordinates" readonly placeholder="Click on graph to see coordinates...">
                             </div>
                             <div class="flex-column">
                                 <label for="y-axis-min">Y Min:</label>
                                 <input id="y-axis-min" placeholder="Enter Auto or a number..." value="Auto">
                                 <label for="y-axis-max">Y Max:</label>
                                 <input id="y-axis-max" placeholder="Enter Auto or a number..." value="Auto">
-                                <label for="clicked-coordinates">Clicked Coordinates:</label>
-                                <input id="clicked-coordinates" readonly placeholder="Click on graph to see coordinates...">
-
+                                <label for="show-plot-data">Show Data</label>
+                                <input type="checkbox" id="show-plot-data" checked="false">
                             </div>
                         </div>
                         <span style="text-align: center;"><input type="checkbox" id="best-fit-checkbox"><label
@@ -456,10 +455,12 @@ canvas {
     </main>
     <footer>&copy; Gary Davenport 2025</footer>
     <script>
+        document.getElementById("show-plot-data").checked=false;//make sure on loading it is unchecked;
         document.getElementById("plot-container").style.display = "none";
         document.getElementById("csvResult").style.display = "inherit";
         document.getElementById("scatter-plot-button").addEventListener("click", toggleScatterPlot);
         function toggleScatterPlot() {
+            document.getElementById("show-plot-data").checked=false;
             let plotContainer = document.getElementById("plot-container");
             let csvResultsContainer = document.getElementById("csvResult");
             if (plotContainer.style.display === "none") {
@@ -551,6 +552,7 @@ function populateSelectElementsOfPlotHeaders() {
 }
 
 
+document.getElementById("show-plot-data").addEventListener("change",drawScatterPlot);
 // Function to draw the scatter plot
 function drawScatterPlot() {
     let xHeader = xSelect.value;
@@ -566,11 +568,15 @@ function drawScatterPlot() {
     let labels = []; // Array to hold the labels
     
     // Populate xValues, yValues, and labels using for loops
-    for (let i = 1; i < plotDataset.length; i++) {
-        xValues.push(Number(plotDataset[i][xIndex]));
-        yValues.push(Number(plotDataset[i][yIndex]));
-        labels.push(plotDataset[i][labelIndex]); // Get the label for each point
+    let checked=document.getElementById("show-plot-data").checked;
+    if (checked){
+        for (let i = 1; i < plotDataset.length; i++) {
+            xValues.push(Number(plotDataset[i][xIndex]));
+            yValues.push(Number(plotDataset[i][yIndex]));
+            labels.push(plotDataset[i][labelIndex]); // Get the label for each point
+        }
     }
+
 
     // Get max/min values for plot
     let xMin = Math.min(...xValues);
