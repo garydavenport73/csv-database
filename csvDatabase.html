@@ -4094,6 +4094,17 @@ function parseGenericSelect(strSQL) {
         //scan string to see if it is a join
         //if so, get leftTable, joinType, righTable,joinCondition
         //process the table and get the joined table
+        if (checkIfTableAndColumnsOrderMatch(leftTableName,rightTableName,leftColumn,rightColumn)){
+            //table = innerJoin(leftTable, rightTable, leftColumn, rightColumn, comparator);
+        }
+        else if (checkIfTableAndColumnsOrderAreOpposite(leftTableName,rightTableName,leftColumn,rightColumn)){
+            let temp=leftColumn;
+            leftColumn=rightColumn;
+            rightColumn=temp;
+        }
+        else{
+            return getErrorTable("Table Names and Column Parents Not Matching: "+leftTableName+"-"+leftColumn+"-"+rightTableName+"-"+rightColumn+" while parsing: "+strSQL);
+        }
         if (strSQL.indexOf("INNER") !== -1) {
             table = innerJoin(leftTable, rightTable, leftColumn, rightColumn, comparator);
         }
@@ -4205,6 +4216,30 @@ function parseGenericSelect(strSQL) {
     console.log(table);
     console.log(table["data"].length);
     return table;
+}
+
+function checkIfTableAndColumnsOrderMatch(leftTableName,rightTableName,leftColumn,rightColumn){
+    let leftColumnParent = leftColumn.split(".")[0].trim();
+    let rightColumnParent=rightColumn.split(".")[0].trim();
+    if ((leftTableName===leftColumnParent)&&(rightTableName===rightColumnParent)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+function checkIfTableAndColumnsOrderAreOpposite(leftTableName,rightTableName,leftColumn,rightColumn){
+    console.log("leftTableName,rightTableName,leftColumn,rightColumn");
+    console.log(leftTableName,rightTableName,leftColumn,rightColumn);
+    let leftColumnParent = leftColumn.split(".")[0].trim();
+    let rightColumnParent=rightColumn.split(".")[0].trim();
+    if ((leftTableName===rightColumnParent)&&(rightTableName===leftColumnParent)){
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 
 function getErrorTable(error){
