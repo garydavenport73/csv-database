@@ -1432,9 +1432,6 @@ function selectAllRightJoin(leftTable, rightTable, leftColumn, rightColumn, comp
     rTable = _convertTableToFormalColumns(rTable);
 
     let leftIndex = _getColumnIndex(leftColumn, lTable["headers"]);
-    console.log("ltable!!!!!!!!!!!!", lTable);
-    console.log("rTable", rTable);
-
     let rightIndex = _getColumnIndex(rightColumn, rTable["headers"]);
     let dataType = rTable["dataTypes"][rightIndex];
 
@@ -1448,10 +1445,12 @@ function selectAllRightJoin(leftTable, rightTable, leftColumn, rightColumn, comp
     let dataTypes = lTable["dataTypes"].concat(rightTable["dataTypes"]);
 
     let resultData = [];
-    //go through the left table rows
+    
+    // Go through the right table rows
     for (let i = 0; i < rightData.length; i++) {
-        //go through the right table rows
         let matchFound = false;
+
+        // Go through the left table rows to find matches
         for (let j = 0; j < leftData.length; j++) {
             if (_testWhereCondition(leftData[j][leftIndex], comparator, rightData[i][rightIndex], dataType)) {
                 matchFound = true;
@@ -1459,26 +1458,86 @@ function selectAllRightJoin(leftTable, rightTable, leftColumn, rightColumn, comp
                 resultData.push(row);
             }
         }
-        if (matchFound === false) {
-            let row = [];
-            for (let j = 0; j < leftHeaders.length; j++) {
-                row.push("");
-            }
-            row = row.concat(rightData[i]);
 
+        // If no match was found, add a row with empty values for left columns
+        if (!matchFound) {
+            let row = []; // Initialize an empty array
+            for (let j = 0; j < leftHeaders.length; j++) {
+                row.push(""); // Push empty strings into the array
+            }
+            row = row.concat(rightData[i]); // Append the right row
             resultData.push(row);
         }
     }
 
-    let resultTable = {}
+    let resultTable = {};
     resultTable["headers"] = headers;
     resultTable["data"] = resultData;
     resultTable["name"] = "result";
     resultTable["dataTypes"] = dataTypes;
-    console.log("SHOULD BE ALL HEADERS", resultTable);
 
     return resultTable;
 }
+
+
+// function selectAllRightJoin(leftTable, rightTable, leftColumn, rightColumn, comparator) {
+//     leftColumn = leftColumn.trim();
+//     rightColumn = rightColumn.trim();
+
+//     let lTable = JSON.parse(JSON.stringify(leftTable));
+//     lTable = _convertTableToFormalColumns(lTable);
+
+//     let rTable = JSON.parse(JSON.stringify(rightTable));
+//     rTable = _convertTableToFormalColumns(rTable);
+
+//     let leftIndex = _getColumnIndex(leftColumn, lTable["headers"]);
+//     console.log("ltable!!!!!!!!!!!!", lTable);
+//     console.log("rTable", rTable);
+
+//     let rightIndex = _getColumnIndex(rightColumn, rTable["headers"]);
+//     let dataType = rTable["dataTypes"][rightIndex];
+
+//     let leftData = lTable["data"];
+//     let rightData = rTable["data"];
+
+//     let leftHeaders = lTable["headers"];
+//     let rightHeaders = rTable["headers"];
+
+//     let headers = leftHeaders.concat(rightHeaders);
+//     let dataTypes = lTable["dataTypes"].concat(rightTable["dataTypes"]);
+
+//     let resultData = [];
+//     //go through the left table rows
+//     for (let i = 0; i < rightData.length; i++) {
+//         //go through the right table rows
+//         let matchFound = false;
+//         for (let j = 0; j < leftData.length; j++) {
+//             if (_testWhereCondition(leftData[j][leftIndex], comparator, rightData[i][rightIndex], dataType)) {
+//                 matchFound = true;
+//                 let row = leftData[j].concat(rightData[i]);
+//                 resultData.push(row);
+//             }
+//         }
+//         if (matchFound === false) {
+//             let row = [];
+//             for (let j = 0; j < leftHeaders.length; j++) {
+//                 row.push("");
+//             }
+//             row = row.concat(rightData[i]);
+
+//             resultData.push(row);
+//         }
+//     }
+
+//     let resultTable = {}
+//     resultTable["headers"] = headers;
+//     resultTable["data"] = resultData;
+//     resultTable["name"] = "result";
+//     resultTable["dataTypes"] = dataTypes;
+//     console.log("SHOULD BE ALL HEADERS", resultTable);
+
+//     return resultTable;
+// }
 
 function selectAllLeftJoin(leftTable, rightTable, leftColumn, rightColumn, comparator) {
     leftColumn = leftColumn.trim();
@@ -1517,7 +1576,8 @@ function selectAllLeftJoin(leftTable, rightTable, leftColumn, rightColumn, compa
             }
         }
         if (matchFound === false) {
-            let row = leftData[i];
+            //let row = leftData[i];
+            let row=leftData[i].slice();
             for (let j = 0; j < rightHeaders.length; j++) {
                 row.push("");
             }
@@ -1565,9 +1625,9 @@ function selectAllInnerJoin(leftTable, rightTable, leftColumn, rightColumn, comp
 
     let resultData = [];
     //go through the left table rows
-    let leftDataLength=leftData.length;
+    let leftDataLength = leftData.length;
     for (let i = 0; i < leftData.length; i++) {
-        console.log("joining on row: ", i,i/leftDataLength);
+        console.log("joining on row: ", i, i / leftDataLength);
         //go through the right table rows
         for (let j = 0; j < rightData.length; j++) {
             // console.log("leftData[i][leftIndex], comparator, rightData[j][rightIndex], dataType");
@@ -1913,17 +1973,17 @@ function _orderData(data, index, dataType = "STRING", direction = "ASC") {
     return data;
 }
 
-function sortByColumn(a, colIndex, dataType = "NUMBER",direction="ASC") {
-    a=JSON.parse(JSON.stringify(a));
+function sortByColumn(a, colIndex, dataType = "NUMBER", direction = "ASC") {
+    a = JSON.parse(JSON.stringify(a));
     if (dataType = "NUMBER") {
         function sortFunction(a, b) {
 
 
 
-            if(isNaN(Number(a[colIndex]))){
+            if (isNaN(Number(a[colIndex]))) {
                 return 1;
             }
-            else if(isNaN(Number(b[colIndex]))){
+            else if (isNaN(Number(b[colIndex]))) {
                 return -1;
             }
             else if (Number(a[colIndex]) > Number(b[colIndex])) {
@@ -1939,7 +1999,7 @@ function sortByColumn(a, colIndex, dataType = "NUMBER",direction="ASC") {
             }
         }
         a.sort(sortFunction);
-        if (direction==="DESC"){
+        if (direction === "DESC") {
             a.reverse();
         }
         return a;
@@ -1956,7 +2016,7 @@ function sortByColumn(a, colIndex, dataType = "NUMBER",direction="ASC") {
             }
         }
         a.sort(sortFunction);
-        if (direction==="DESC"){
+        if (direction === "DESC") {
             a.reverse();
         }
         return a;
@@ -1973,13 +2033,13 @@ function bubbleSort(arrays, columnIndex, dataType = "STRING", direction = "ASC",
     let n = arr.length;
     for (let i = 0; i < n - 1; i++) {
         for (let j = 0; j < n - i - 1; j++) {
-            if ((holdColumnIndex===-1)|| (arr[j][holdColumnIndex]===arr[j+1][holdColumnIndex])  ){
+            if ((holdColumnIndex === -1) || (arr[j][holdColumnIndex] === arr[j + 1][holdColumnIndex])) {
 
-                let numberCondition=((Number(arr[j][columnIndex]) > Number(arr[j + 1][columnIndex])) || (isNaN(Number(arr[j + 1][columnIndex]))));
-                let stringCondition=(arr[j][columnIndex] > arr[j + 1][columnIndex]);
-                if (direction==="DESC"){
-                    numberCondition=!numberCondition;
-                    stringCondition=!stringCondition;
+                let numberCondition = ((Number(arr[j][columnIndex]) > Number(arr[j + 1][columnIndex])) || (isNaN(Number(arr[j + 1][columnIndex]))));
+                let stringCondition = (arr[j][columnIndex] > arr[j + 1][columnIndex]);
+                if (direction === "DESC") {
+                    numberCondition = !numberCondition;
+                    stringCondition = !stringCondition;
                 }
                 if (dataType === "NUMBER") {
                     if (isNaN(Number(arr[j + 1][columnIndex]))) {
@@ -2010,7 +2070,7 @@ function bubbleSort(arrays, columnIndex, dataType = "STRING", direction = "ASC",
 
 
 function _testWhereCondition(field, comparator, testValue, dataType) {
-    
+
     //=, !=, <>, >=, <=, >, <
     // console.log(field, comparator, testValue, dataType);
     let value;
@@ -2142,13 +2202,13 @@ function myReplaceAll(str, match, replacement) {
     return str.replace(new RegExp(escapeRegExp(match), 'g'), () => replacement);
 }
 
-function orderBy(table, column, direction = "ASC",holdIndex=-1) {////////////GOES TO PROCESS
+function orderBy(table, column, direction = "ASC", holdIndex = -1) {////////////GOES TO PROCESS
     table = JSON.parse(JSON.stringify(table));
     data = table["data"];
     let columnIndex = _getColumnIndex(column, table["headers"]);
     let dataType = table["dataTypes"][columnIndex];
     //table["data"] = sortByColumn(data,columnIndex,dataType,direction);
-    table["data"] = bubbleSort(data, columnIndex, dataType, direction,holdIndex);//hard copy
+    table["data"] = bubbleSort(data, columnIndex, dataType, direction, holdIndex);//hard copy
 
     return table;
 }
@@ -2504,15 +2564,15 @@ function selectSideBySideJoin(leftTable, rightTable, columns) {
     rightData = rightTable["data"];
     if (rightData.length > leftData.length) {
         leftTable = _addEmptyRows(leftTable, rightData.length - leftData.length);
-        leftData=leftTable["data"];
+        leftData = leftTable["data"];
     }
     else if (rightData.length < leftData.length) {
         rightTable = _addEmptyRows(rightTable, leftData.length - rightData.length);
-        rightData=rightTable["data"];
+        rightData = rightTable["data"];
     }
 
-    console.log("LEFT TABLE LENGTH!!!!!!!!",leftData.length);
-    console.log("RIGHT TABLE LENGTH!!!!!!!!",rightData.length);
+    console.log("LEFT TABLE LENGTH!!!!!!!!", leftData.length);
+    console.log("RIGHT TABLE LENGTH!!!!!!!!", rightData.length);
 
 
     let resultTable = {};
@@ -2575,43 +2635,43 @@ function selectSideBySideJoin(leftTable, rightTable, columns) {
     return resultTable;
 }
 
-function updateTableComputeColumn(table,column,expression){
+function updateTableComputeColumn(table, column, expression) {
     console.log("updateTableComputeColumn(table,column,expression)");
     console.log("column,expression")
-    console.log(column,expression);    
-    table=JSON.parse(JSON.stringify(table));
-    let data=table["data"];
-    let headers=table["headers"];
-    let dataTypes=table["dataTypes"];
-    let colIndex=_getColumnIndex(column,headers);
-    for (let i=0;i<data.length;i++){
-        let str=_formExpression(expression,data[i],headers,dataTypes);
-        console.log("formed Expression:",str);
-        let result=myEval(str);
+    console.log(column, expression);
+    table = JSON.parse(JSON.stringify(table));
+    let data = table["data"];
+    let headers = table["headers"];
+    let dataTypes = table["dataTypes"];
+    let colIndex = _getColumnIndex(column, headers);
+    for (let i = 0; i < data.length; i++) {
+        let str = _formExpression(expression, data[i], headers, dataTypes);
+        console.log("formed Expression:", str);
+        let result = myEval(str);
         console.log(result);
-        data[i][colIndex]=result.toString();
+        data[i][colIndex] = result.toString();
     }
     console.log(data);
-    table["data"]=data;
+    table["data"] = data;
     return table;
 }
 
-function _formExpression(str,row,headers,dataTypes){
-    let tokens=_getTokensEnclosedInBackTicks(str);
-    tokens=removeDuplicates(tokens);
-    for (let i=0;i<tokens.length;i++){
-         let strippedToken=tokens[i].replace(/`/g,"").trim();
-        let tokenIndex=_getColumnIndex(strippedToken,headers);
+function _formExpression(str, row, headers, dataTypes) {
+    let tokens = _getTokensEnclosedInBackTicks(str);
+    tokens = removeDuplicates(tokens);
+    for (let i = 0; i < tokens.length; i++) {
+        let strippedToken = tokens[i].replace(/`/g, "").trim();
+        let tokenIndex = _getColumnIndex(strippedToken, headers);
         let regex = new RegExp(tokens[i], "g");//form regex from token
-        let replaceString="";
-        if (dataTypes[tokenIndex]==="STRING"){
-            replaceString="\""+row[tokenIndex]+"\".toString()";
+        let replaceString = "";
+        if (dataTypes[tokenIndex] === "STRING") {
+            replaceString = "\"" + row[tokenIndex] + "\".toString()";
         }
         else {
-            replaceString="Number(\""+row[tokenIndex]+"\")";
+            replaceString = "Number(\"" + row[tokenIndex] + "\")";
         }
         //str=str.replace(regex,replaceString);
-        str=str.replaceAll(tokens[i],replaceString);
+        str = str.replaceAll(tokens[i], replaceString);
     }
     return str;
 }
@@ -2636,14 +2696,14 @@ function _formExpression(str,row,headers,dataTypes){
 //     return str;
 // }
 
-function _getTokensEnclosedInBackTicks(str){
-    let regex=/`([^`]+)`/g
-    let arr=str.match(regex);
+function _getTokensEnclosedInBackTicks(str) {
+    let regex = /`([^`]+)`/g
+    let arr = str.match(regex);
     return arr;
 }
 
-function myEval(str){
-    let result=Function("return "+str)();
+function myEval(str) {
+    let result = Function("return " + str)();
     return result;
 }
 
@@ -2892,16 +2952,19 @@ function distinct(table) {////////////GOES TO PROCESS
 
 
 
-innerJoin=selectAllInnerJoin;
+innerJoin = selectAllInnerJoin;
+leftJoin=selectAllLeftJoin;
+rightJoin=selectAllRightJoin;
+
 let process = {};
 
-process.limit=limit;
-process.offset=offset;
-process.distinct=distinct;
-process.groupBy=groupBy;
-process.whereEval=whereEval;
-process.getDataTypeOfColumn=getDataTypeOfColumn;
-process.updateTableComputeColumn=updateTableComputeColumn;
+process.limit = limit;
+process.offset = offset;
+process.distinct = distinct;
+process.groupBy = groupBy;
+process.whereEval = whereEval;
+process.getDataTypeOfColumn = getDataTypeOfColumn;
+process.updateTableComputeColumn = updateTableComputeColumn;
 process.selectSideBySideJoin = selectSideBySideJoin;
 process.simplifyColumnNames = simplifyColumnNames;
 process.applyLoop = applyLoop;
@@ -4080,7 +4143,8 @@ function parseGenericSelect(strSQL) {
     //leftTable, rightTable, leftColumn, rightColumn, comparator
 
     if (strSQL.indexOf("JOIN") !== -1) {
-        let regex = /SELECT\s+(.+)\s+FROM\s+(.+)\s+INNER\s+JOIN\s+(.+)\s+ON\s+(.+?)\s*(\!\=|\<\>|\>\=|\<\=|\>|\<|\=)\s*(.+?)\s/;
+        console.log("doing a join");
+        let regex = /SELECT\s+(.+)\s+FROM\s+(.+)\s+.+\s+JOIN\s+(.+)\s+ON\s+(.+?)\s*(\!\=|\<\>|\>\=|\<\=|\>|\<|\=)\s*(.+?)\s/;
         let regexResult = regex.exec(strSQL);
         // let columnsString = regexResult[1];
         //let leftTableName = regexResult[2];
@@ -4106,7 +4170,18 @@ function parseGenericSelect(strSQL) {
             return getErrorTable("Table Names and Column Parents Not Matching: "+leftTableName+"-"+leftColumn+"-"+rightTableName+"-"+rightColumn+" while parsing: "+strSQL);
         }
         if (strSQL.indexOf("INNER") !== -1) {
+            console.log("doing inner join");
+
+            //innerJoin = selectAllInnerJoin;
             table = innerJoin(leftTable, rightTable, leftColumn, rightColumn, comparator);
+        }
+        else if (strSQL.indexOf("LEFT") !== -1){
+            console.log("***********doing left join********");
+            table = leftJoin(leftTable, rightTable, leftColumn, rightColumn, comparator);
+        }
+        else if (strSQL.indexOf("RIGHT") !== -1){
+            console.log("***********doing right join********");
+            table = rightJoin(leftTable, rightTable, leftColumn, rightColumn, comparator);
         }
 
 
@@ -4421,6 +4496,8 @@ let sqlOptionsArray = [["SELECT Columns","SELECT CustomerName, City, Country FRO
 ["SELECT AVG","SELECT AVG(Price) FROM Products GROUP BY AVG(Price);"],
 ["SELECT SUM","SELECT SUM(Quantity) FROM OrderDetails GROUP BY SUM(Quantity);"],
 ["INNER JOIN","SELECT Orders.OrderID, Customers.CustomerName FROM Orders INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID;"],
+["LEFT JOIN","SELECT Customers.CustomerName, Orders.OrderID FROM Customers LEFT JOIN Orders ON Customers.CustomerID=Orders.CustomerID ORDER BY Customers.CustomerName;"],
+["RIGHT JOIN","SELECT Orders.OrderID, Employees.LastName, Employees.FirstName FROM Orders RIGHT JOIN Employees ON Orders.EmployeeID = Employees.EmployeeID ORDER BY Orders.OrderID;"],
 ["UNION ALL","SELECT City FROM Customers UNION ALL SELECT City FROM Suppliers;"],
 ["SELECT COUNT with GROUP BY","SELECT COUNT(CustomerID), Country FROM Customers GROUP BY Country;"],
 ["SELECT COUNT with ORDER BY and ORDER BY","SELECT COUNT(CustomerID), Country FROM Customers GROUP BY Country ORDER BY COUNT(CustomerID) DESC;"],
