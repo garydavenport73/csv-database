@@ -769,11 +769,30 @@ function drawBestFitLine(xValues, yValues, xMin, xMax, yMin, yMax) {
     // Display the equation and R-squared value
     plotCtx.fillStyle = 'red';
     plotCtx.font = '12px Arial';
-    plotCtx.fillText('y = ' + slope.toFixed(2) + 'x + ' + intercept.toFixed(2), 10, 20);
-    plotCtx.fillText('R² = ' + rSquared.toFixed(2), 10, 40); // Display R-squared value
+    //plotCtx.fillText('y = ' + slope.toFixed(2) + 'x + ' + intercept.toFixed(2), 10, 20);
+
+    plotCtx.fillText('y = ' + toPrecisionWithoutScientific(slope, 3)  + 'x + ' + toPrecisionWithoutScientific(intercept, 3) , 10, 20);
+
+
+    //plotCtx.fillText('R² = ' + rSquared.toFixed(2), 10, 40); // Display R-squared value
+
+    plotCtx.fillText('R² = ' + toPrecisionWithoutScientific(rSquared, 3), 10, 40); // Display R-squared value
 }
 
-
+function toPrecisionWithoutScientific(num, precision) {
+    // Use toPrecision to get the formatted number
+    let result = num.toPrecision(precision);
+    
+    // Check if the result is in scientific notation
+    if (result.includes('e')) {
+        // Convert to a number and then to a fixed-point notation
+        // Adjust the number of decimal places as needed
+        const decimalPlaces = Math.max(0, precision - 1); // Ensure at least 0 decimal places
+        result = parseFloat(result).toFixed(decimalPlaces);
+    }
+    
+    return result;
+}
 
 
 // Event listeners for select changes and checkbox
